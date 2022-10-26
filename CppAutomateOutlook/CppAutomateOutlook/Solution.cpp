@@ -163,7 +163,7 @@ DWORD WINAPI AutomateOutlookByCOMAPI(LPVOID lpParam)
 	{
 		VARIANT x;
 		x.vt = VT_BSTR;
-		x.bstrVal = SysAllocString(L"OutlookAddIn");
+		x.bstrVal = SysAllocString(L"DKOutlookAddIn");
 
 		VARIANT result;
 		VariantInit(&result);
@@ -184,7 +184,7 @@ DWORD WINAPI AutomateOutlookByCOMAPI(LPVOID lpParam)
 	{
 		VARIANT result;
 		VariantInit(&result);
-		AutoWrap(DISPATCH_METHOD, &result, myAddinObj, L"GetArrayFromCSharp", 0);
+		AutoWrap(DISPATCH_METHOD, &result, myAddinObj, L"GetAppointmentArray", 0);
 
 		
 		_putws(result.bstrVal);
