@@ -23,12 +23,29 @@ namespace DKOutlookAddIn
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             utilities.SetAddIn(this);
+
+            Outlook.MAPIFolder calendar = Application.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderCalendar);
+
+            Outlook.Items calendarItems = calendar.Items;
+
+            calendarItems.ItemAdd += OnEventItemChanged;
+            calendarItems.ItemChange += OnEventItemChanged;
+            calendarItems.ItemRemove += OnEventItemRemove;
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
             // Note: Outlook no longer raises this event. If you have code that 
             //    must run when Outlook shuts down, see https://go.microsoft.com/fwlink/?LinkId=506785
+        }
+
+        void OnEventItemChanged(object item)
+        {
+            //TODO
+        }
+        void OnEventItemRemove()
+        {
+            //TODO
         }
 
         #region VSTO generated code

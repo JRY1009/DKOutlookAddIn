@@ -31,6 +31,8 @@ namespace DKOutlookAddIn
             while (item != null)
             {
                 JObject obj = new JObject();
+                obj["EntryID"] = item.EntryID;
+                obj["Importance"] = item.Importance.ToString(); 
                 obj["Subject"] = item.Subject;
                 obj["Location"] = item.Location;
                 obj["Body"] = item.Body;
