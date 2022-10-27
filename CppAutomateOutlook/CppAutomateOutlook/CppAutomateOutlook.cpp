@@ -9,7 +9,7 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	HANDLE hThread = CreateThread(NULL, 0, AutomateOutlookByCOMAPI, NULL, 0, NULL);
+	HANDLE hThread = CreateThread(NULL, 0, AutomateOutlookByCOMAPI2, NULL, 0, NULL);
 	WaitForSingleObject(hThread, INFINITE);
 	CloseHandle(hThread);
 	return 0;

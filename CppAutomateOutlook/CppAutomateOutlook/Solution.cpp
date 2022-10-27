@@ -191,10 +191,6 @@ DWORD WINAPI AutomateOutlookByCOMAPI(LPVOID lpParam)
 	}
 
 
-	if (comAddins != NULL)
-	{
-		comAddins->Release();
-	}
 	if (myAddin != NULL)
 	{
 		myAddin->Release();
@@ -202,6 +198,125 @@ DWORD WINAPI AutomateOutlookByCOMAPI(LPVOID lpParam)
 	if (myAddinObj != NULL)
 	{
 		myAddinObj->Release();
+	}
+	if (comAddins != NULL)
+	{
+		comAddins->Release();
+	}
+	if (pOutlookApp != NULL)
+	{
+		pOutlookApp->Release();
+	}
+	// Uninitialize COM for this thread.
+	CoUninitialize();
+}
+
+DWORD WINAPI AutomateOutlookByCOMAPI2(LPVOID lpParam)
+{
+	// Initializes the COM library on the current thread and identifies 
+	// the concurrency model as single-thread apartment (STA). 
+	// [-or-] CoInitialize(NULL);
+	// [-or-] CoCreateInstance(NULL);
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+	// Define vtMissing for optional parameters in some calls.
+	VARIANT vtMissing;
+	vtMissing.vt = VT_EMPTY;
+
+	// Get CLSID of the server
+	CLSID clsid;
+	HRESULT hr;
+
+	// Option 1. Get CLSID from ProgID using CLSIDFromProgID.
+	LPCOLESTR progID = L"Outlook.Application";
+	hr = CLSIDFromProgID(progID, &clsid);
+	if (FAILED(hr))
+	{
+		wprintf(L"CLSIDFromProgID(\"%s\") failed w/err 0x%08lx\n", progID, hr);
+		return 1;
+	}
+	// Option 2. Build the CLSID directly.
+	/*const IID CLSID_Application =
+	{0x0006F03A,0x0000,0x0000,{0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46}};
+	clsid = CLSID_Application;*/
+
+	// Get the IDispatch interface of the running instance
+
+	IUnknown* pUnk = NULL;
+	IDispatch* pOutlookApp = NULL;
+	hr = GetActiveObject(
+		clsid, NULL, (IUnknown**)&pUnk
+	);
+
+	if (FAILED(hr))
+	{
+		wprintf(L"GetActiveObject failed with w/err 0x%08lx\n", hr);
+		return 1;
+	}
+
+	hr = pUnk->QueryInterface(IID_IDispatch, (void**)&pOutlookApp);
+	if (FAILED(hr))
+	{
+		wprintf(L"QueryInterface failed with w/err 0x%08lx\n", hr);
+		return 1;
+	}
+
+	_putws(L"Outlook.Application is found");
+
+	IDispatch* comAddins = NULL;
+	{
+		VARIANT result;
+		VariantInit(&result);
+		AutoWrap(DISPATCH_PROPERTYGET, &result, pOutlookApp, L"COMAddins", 0);
+		comAddins = result.pdispVal;
+	}
+
+	IDispatch* myAddin = NULL;
+	{
+		VARIANT x;
+		x.vt = VT_BSTR;
+		x.bstrVal = SysAllocString(L"DKOutlookAddIn");
+
+		VARIANT result;
+		VariantInit(&result);
+		AutoWrap(DISPATCH_METHOD, &result, comAddins, L"Item", 1, x);
+		myAddin = result.pdispVal;
+
+		VariantClear(&x);
+	}
+
+	IDispatch* myAddinObj = NULL;
+	{
+		VARIANT result;
+		VariantInit(&result);
+		AutoWrap(DISPATCH_PROPERTYGET, &result, myAddin, L"Object", 0);
+		myAddinObj = result.pdispVal;
+	}
+
+	{
+		VARIANT x;
+		x.vt = VT_BSTR;
+		x.bstrVal = SysAllocString(L"\[\{\"Subject\": \"NEW Appointment\",\"Location\": \"HHHH\",\"Body\": \"32134444\",\"Start\": \"2022/10/29 9:30:00\",\"End\": \"2022/10/29 10:00:00\"\}\]");
+
+		VARIANT result;
+		VariantInit(&result);
+		AutoWrap(DISPATCH_METHOD, &result, myAddinObj, L"SetAppointmentArray", 1, x);
+
+		VariantClear(&x);
+	}
+
+
+	if (myAddin != NULL)
+	{
+		myAddin->Release();
+	}
+	if (myAddinObj != NULL)
+	{
+		myAddinObj->Release();
+	}
+	if (comAddins != NULL)
+	{
+		comAddins->Release();
 	}
 	if (pOutlookApp != NULL)
 	{

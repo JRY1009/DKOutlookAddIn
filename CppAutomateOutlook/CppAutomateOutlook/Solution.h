@@ -14,3 +14,5 @@
 //      function. 
 //
 DWORD WINAPI AutomateOutlookByCOMAPI(LPVOID lpParam);
+
+DWORD WINAPI AutomateOutlookByCOMAPI2(LPVOID lpParam);
