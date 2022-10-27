@@ -34,6 +34,8 @@ namespace DKOutlookAddIn
                 obj["Subject"] = item.Subject;
                 obj["Location"] = item.Location;
                 obj["Body"] = item.Body;
+                obj["Start"] = item.Start.ToString();
+                obj["End"] = item.End.ToString();
 
                 jArray.Add(obj);
 
