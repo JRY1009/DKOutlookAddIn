@@ -58,7 +58,8 @@ namespace DKOutlookAddIn
 
             try
             {
-                JArray jArray = JArray.Parse(json);
+                JObject jRoot = JObject.Parse(json);
+                JArray jArray = jRoot["appointmentArray"].ToObject<JArray>();
                 foreach (var item in jArray)
                 {
                     JObject obj = (JObject)item;
@@ -68,22 +69,24 @@ namespace DKOutlookAddIn
                     Outlook.AppointmentItem matchItem = calendarItems.Find("[Subject] = '" + Subject + "'");
                     if (matchItem != null)
                     {
-                        matchItem.Start = DateTime.Parse(obj["Start"].ToString());
-                        matchItem.End = DateTime.Parse(obj["End"].ToString());
-                        matchItem.Location = obj["Location"].ToString();
-                        matchItem.Body = obj["Body"].ToString();
-                        matchItem.Subject = obj["Subject"].ToString();
+                        if (obj["Start"] != null)       matchItem.Start = DateTime.Parse(obj["Start"].ToString());
+                        if (obj["End"] != null)         matchItem.End = DateTime.Parse(obj["End"].ToString());
+                        if (obj["Location"] != null)    matchItem.Location = obj["Location"].ToString();
+                        if (obj["Body"] != null)        matchItem.Body = obj["Body"].ToString();
+                        if (obj["Subject"] != null)     matchItem.Subject = obj["Subject"].ToString();
+                        if (obj["AllDayEvent"] != null) matchItem.AllDayEvent = obj["AllDayEvent"].ToObject<bool>();
                         matchItem.Save();
                         //matchItem.Display(true);
                     }
                     else
                     {
                         Outlook.AppointmentItem newAppointment = (Outlook.AppointmentItem)addIn.Application.CreateItem(Outlook.OlItemType.olAppointmentItem);
-                        newAppointment.Start = DateTime.Parse(obj["Start"].ToString());
-                        newAppointment.End = DateTime.Parse(obj["End"].ToString());
-                        newAppointment.Location = obj["Location"].ToString();
-                        newAppointment.Body = obj["Body"].ToString();
-                        newAppointment.Subject = obj["Subject"].ToString();
+                        if (obj["Start"] != null)       newAppointment.Start = DateTime.Parse(obj["Start"].ToString());
+                        if (obj["End"] != null)         newAppointment.End = DateTime.Parse(obj["End"].ToString());
+                        if (obj["Location"] != null)    newAppointment.Location = obj["Location"].ToString();
+                        if (obj["Body"] != null)        newAppointment.Body = obj["Body"].ToString();
+                        if (obj["Subject"] != null)     newAppointment.Subject = obj["Subject"].ToString();
+                        if (obj["AllDayEvent"] != null) newAppointment.AllDayEvent = obj["AllDayEvent"].ToObject<bool>();
                         newAppointment.Save();
                         //newAppointment.Display(true);
                     }
