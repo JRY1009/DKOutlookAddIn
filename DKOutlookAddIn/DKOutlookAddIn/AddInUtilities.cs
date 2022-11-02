@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using Outlook = Microsoft.Office.Interop.Outlook;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Web;
+using System.Text;
 
 namespace DKOutlookAddIn
 {
@@ -26,6 +28,7 @@ namespace DKOutlookAddIn
 
             Outlook.Items calendarItems = calendar.Items;
 
+            JObject jRoot = new JObject();
             JArray jArray = new JArray();
 
             Outlook.AppointmentItem item = calendarItems.GetFirst() as Outlook.AppointmentItem;
@@ -33,7 +36,7 @@ namespace DKOutlookAddIn
             while (item != null)
             {
                 JObject obj = new JObject();
-                obj["EntryID"] = item.EntryID;
+                //obj["EntryID"] = item.EntryID;
                 obj["Importance"] = item.Importance.ToString();
                 obj["Subject"] = item.Subject;
                 obj["Location"] = item.Location;
@@ -47,7 +50,8 @@ namespace DKOutlookAddIn
                 item = calendarItems.GetNext();
             }
 
-            return jArray.ToString();
+            jRoot["appointmentArray"] = jArray;
+            return jRoot.ToString();
         }
 
         public void SetAppointmentArray(string json)
@@ -71,9 +75,9 @@ namespace DKOutlookAddIn
                     {
                         if (obj["Start"] != null)       matchItem.Start = DateTime.Parse(obj["Start"].ToString());
                         if (obj["End"] != null)         matchItem.End = DateTime.Parse(obj["End"].ToString());
-                        if (obj["Location"] != null)    matchItem.Location = obj["Location"].ToString();
-                        if (obj["Body"] != null)        matchItem.Body = obj["Body"].ToString();
-                        if (obj["Subject"] != null)     matchItem.Subject = obj["Subject"].ToString();
+                        if (obj["Location"] != null)    matchItem.Location = UrlDecode(obj["Location"].ToString(), Encoding.UTF8);
+                        if (obj["Body"] != null)        matchItem.Body = UrlDecode(obj["Body"].ToString(), Encoding.UTF8);
+                        if (obj["Subject"] != null)     matchItem.Subject = UrlDecode(obj["Subject"].ToString(), Encoding.UTF8);
                         if (obj["AllDayEvent"] != null) matchItem.AllDayEvent = obj["AllDayEvent"].ToObject<bool>();
                         matchItem.Save();
                         //matchItem.Display(true);
@@ -83,9 +87,9 @@ namespace DKOutlookAddIn
                         Outlook.AppointmentItem newAppointment = (Outlook.AppointmentItem)addIn.Application.CreateItem(Outlook.OlItemType.olAppointmentItem);
                         if (obj["Start"] != null)       newAppointment.Start = DateTime.Parse(obj["Start"].ToString());
                         if (obj["End"] != null)         newAppointment.End = DateTime.Parse(obj["End"].ToString());
-                        if (obj["Location"] != null)    newAppointment.Location = obj["Location"].ToString();
-                        if (obj["Body"] != null)        newAppointment.Body = obj["Body"].ToString();
-                        if (obj["Subject"] != null)     newAppointment.Subject = obj["Subject"].ToString();
+                        if (obj["Location"] != null)    newAppointment.Location = UrlDecode(obj["Location"].ToString(), Encoding.UTF8);
+                        if (obj["Body"] != null)        newAppointment.Body = UrlDecode(obj["Body"].ToString(), Encoding.UTF8);
+                        if (obj["Subject"] != null)     newAppointment.Subject = UrlDecode(obj["Subject"].ToString(), Encoding.UTF8);
                         if (obj["AllDayEvent"] != null) newAppointment.AllDayEvent = obj["AllDayEvent"].ToObject<bool>();
                         newAppointment.Save();
                         //newAppointment.Display(true);
@@ -96,6 +100,36 @@ namespace DKOutlookAddIn
             {
                 Console.WriteLine("err: " + ex.ToString());
             }
+        }
+        public static string UrlEncode(string text, Encoding encod, bool cap = true)
+        {
+            if (cap)
+            {
+                StringBuilder builder = new StringBuilder();
+                foreach (char c in text)
+                {
+                    if (System.Web.HttpUtility.UrlEncode(c.ToString(), encod).Length > 1)
+                    {
+                        builder.Append(System.Web.HttpUtility.UrlEncode(c.ToString(), encod).ToUpper());
+                    }
+                    else
+                    {
+                        builder.Append(c);
+                    }
+                }
+                return builder.ToString();
+            }
+            else
+            {
+                string encodString = System.Web.HttpUtility.UrlEncode(text, encod);
+                return encodString;
+            }
+        }
+
+        public static string UrlDecode(string encodString, Encoding encod)
+        {
+            string text = System.Web.HttpUtility.UrlDecode(encodString, encod);
+            return text;
         }
     }
 }
