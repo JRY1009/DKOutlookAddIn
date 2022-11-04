@@ -38,9 +38,9 @@ namespace DKOutlookAddIn
                 JObject obj = new JObject();
                 //obj["EntryID"] = item.EntryID;
                 obj["Importance"] = item.Importance.ToString();
-                obj["Subject"] = item.Subject;
-                obj["Location"] = item.Location;
-                obj["Body"] = item.Body;
+                obj["Subject"] = UrlEncode(item.Subject);
+                obj["Location"] = UrlEncode(item.Location);
+                obj["Body"] = UrlEncode(item.Body);
                 obj["Start"] = item.Start.ToString();
                 obj["End"] = item.End.ToString();
                 obj["AllDayEvent"] = item.AllDayEvent;
@@ -51,7 +51,8 @@ namespace DKOutlookAddIn
             }
 
             jRoot["appointmentArray"] = jArray;
-            return jRoot.ToString();
+            string result = jRoot.ToString();
+            return result;
         }
 
         public void SetAppointmentArray(string json)
@@ -101,16 +102,19 @@ namespace DKOutlookAddIn
                 Console.WriteLine("err: " + ex.ToString());
             }
         }
-        public static string UrlEncode(string text, Encoding encod, bool cap = true)
+        public static string UrlEncode(string text, bool cap = true)
         {
+            if (text == null)
+                return null;
+
             if (cap)
             {
                 StringBuilder builder = new StringBuilder();
                 foreach (char c in text)
                 {
-                    if (System.Web.HttpUtility.UrlEncode(c.ToString(), encod).Length > 1)
+                    if (System.Web.HttpUtility.UrlEncode(c.ToString()).Length > 1)
                     {
-                        builder.Append(System.Web.HttpUtility.UrlEncode(c.ToString(), encod).ToUpper());
+                        builder.Append(System.Web.HttpUtility.UrlEncode(c.ToString()).ToUpper());
                     }
                     else
                     {
@@ -121,7 +125,7 @@ namespace DKOutlookAddIn
             }
             else
             {
-                string encodString = System.Web.HttpUtility.UrlEncode(text, encod);
+                string encodString = System.Web.HttpUtility.UrlEncode(text);
                 return encodString;
             }
         }
